@@ -1,0 +1,42 @@
+# HNG Anomaly Detection Engine - Configuration
+# All detection thresholds live here. Do not hardcode values in code.
+
+server:
+  dashboard_host: "0.0.0.0"
+  dashboard_port: 8080
+  dashboard_refresh_seconds: 3
+
+log:
+  nginx_access_log: "/var/log/nginx/hng-access.log"
+  audit_log: "/var/log/detector/audit.log"
+  poll_interval_seconds: 0.1   # how often to check for new log lines
+
+sliding_window:
+  ip_window_seconds: 60        # per-IP deque covers last N seconds
+  global_window_seconds: 60    # global deque covers last N seconds
+
+baseline:
+  rolling_window_minutes: 30   # how far back to compute mean/stddev
+  recalculation_interval_seconds: 60
+  min_samples_for_baseline: 30 # minimum per-second buckets needed before using baseline
+  floor_mean: 1.0              # never let baseline mean drop below this (prevents /0)
+  floor_stddev: 0.5            # never let baseline stddev drop below this
+  prefer_current_hour: true    # use current-hour slot when it has enough data
+
+detection:
+  zscore_threshold: 3.0        # flag if z-score exceeds this
+  multiplier_threshold: 5.0    # flag if rate is more than N× baseline mean
+  error_surge_multiplier: 3.0  # if IP 4xx/5xx rate is N× baseline error rate → tighten
+  tightened_zscore: 2.0        # tighter z-score threshold after error surge detected
+  tightened_multiplier: 3.0    # tighter multiplier after error surge
+
+blocking:
+  ban_schedule_minutes:        # backoff schedule: 10m, 30m, 2h, then permanent
+    - 10
+    - 30
+    - 120
+    - -1                       # -1 means permanent
+
+slack:
+  webhook_url: "${SLACK_WEBHOOK_URL}"   # loaded from environment variable
+  timeout_seconds: 5
