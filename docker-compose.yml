@@ -17,9 +17,6 @@ version: "3.9"
 
 services:
 
-  # --------------------------------------------------------------------------
-  # MariaDB — Nextcloud database backend
-  # --------------------------------------------------------------------------
   db:
     image: mariadb:10.11
     container_name: hng-db
@@ -34,9 +31,6 @@ services:
     networks:
       - hng-net
 
-  # --------------------------------------------------------------------------
-  # Nextcloud — do NOT modify this image
-  # --------------------------------------------------------------------------
   nextcloud:
     image: kefaslungu/hng-nextcloud:latest
     container_name: hng-nextcloud
@@ -53,13 +47,10 @@ services:
       NEXTCLOUD_TRUSTED_DOMAINS: ${SERVER_IP:-localhost}
     volumes:
       - nextcloud_data:/var/www/html
-      - HNG-nginx-logs:/var/log/nginx:ro   # read-only mount of nginx logs
+      - HNG-nginx-logs:/var/log/nginx:ro
     networks:
       - hng-net
 
-  # --------------------------------------------------------------------------
-  # Nginx — reverse proxy with JSON access logging
-  # --------------------------------------------------------------------------
   nginx:
     image: nginx:1.25-alpine
     container_name: hng-nginx
@@ -70,13 +61,10 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - HNG-nginx-logs:/var/log/nginx:rw   # writes JSON logs here
+      - HNG-nginx-logs:/var/log/nginx:rw
     networks:
       - hng-net
 
-  # --------------------------------------------------------------------------
-  # Detector — Python anomaly detection daemon
-  # --------------------------------------------------------------------------
   detector:
     build:
       context: ./detector
@@ -88,25 +76,13 @@ services:
     environment:
       SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
     volumes:
-      - HNG-nginx-logs:/var/log/nginx:ro   # reads nginx logs
-      - detector_logs:/var/log/detector    # audit log output
-    ports:
-      - "8080:8080"   # metrics dashboard
-    networks:
-      - hng-net
-    # The daemon needs cap_net_admin to run iptables on the HOST network.
-    # We use network_mode: host for the detector so iptables rules affect
-    # the host firewall (not just the container network).
-    # NOTE: When network_mode is host, the ports mapping above is ignored;
-    #       the service binds directly on host port 8080.
+      - HNG-nginx-logs:/var/log/nginx:ro
+      - detector_logs:/var/log/detector
     network_mode: host
     cap_add:
       - NET_ADMIN
       - NET_RAW
 
-# =============================================================================
-# Named volumes
-# =============================================================================
 volumes:
   HNG-nginx-logs:
     name: HNG-nginx-logs
@@ -114,9 +90,6 @@ volumes:
   db_data:
   detector_logs:
 
-# =============================================================================
-# Networks
-# =============================================================================
 networks:
   hng-net:
     driver: bridge

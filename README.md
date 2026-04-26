@@ -5,9 +5,9 @@ A real-time HTTP traffic anomaly detector and DDoS response daemon built alongsi
 ## Live Links
 
 > Fill in after deployment:
-- **Metrics Dashboard:** `http://your-domain.com:8080` or `http://dashboard.your-domain.com`
-- **Server IP (Nextcloud):** `http://your.server.ip`
-- **GitHub Repo:** `https://github.com/your-username/hng-detector`
+- **Metrics Dashboard:** `http://3.92.23.79:8080`
+- **Server IP (Nextcloud):** `http://3.92.23.79`
+- **GitHub Repo:** `https://github.com/AirFluke/hng-detector.git`
 - **Blog Post:** `https://dev.to/your-username/...`
 
 ---
